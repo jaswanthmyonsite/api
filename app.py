@@ -15,12 +15,16 @@ fs = gridfs.GridFS(db)
 
 @app.route('/', methods=['GET'])
 def convert_fax():
-    serial_number = request.args.get('serial_number', type=int)
+    serial_number = int(request.args.get('serial_number', type=int))
     if not serial_number:
         return jsonify({"error": "Serial number is required"}), 400
 
+    print(f"Received serial_number: {serial_number}")  # Log the serial_number for debugging
+
     pdf_data = fetch_pdf_by_serial_number(serial_number)
+    
     if not pdf_data:
+        print(f"Fax not found for serial_number: {serial_number}")  # Log the error if fax is not found
         return jsonify({"error": "Fax not found"}), 404
 
     image_files = pdf_to_images(pdf_data)
