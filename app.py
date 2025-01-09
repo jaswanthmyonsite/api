@@ -34,7 +34,7 @@ def convert_fax():
     return send_file(image_files[0], mimetype='image/png')
 
 def fetch_pdf_by_serial_number(serial_number):
-    metadata = db['pdf_metadata'].find({"serial_number": serial_number})
+    metadata = db['pdf_metadata'].find_one({"serial_number": serial_number})
     if not metadata:
         return None
     file_id = metadata['file_id']
