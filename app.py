@@ -1,16 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from pymongo import MongoClient
 import gridfs
-from pdf2image import convert_from_bytes
-from io import BytesIO
 import os
-import zipfile
-
-def create_zip_file(image_paths, zip_file_name):
-    """Create a zip file containing all images."""
-    with zipfile.ZipFile(zip_file_name, 'w') as zipf:
-        for image_path in image_paths:
-            zipf.write(image_path, os.path.basename(image_path))
 
 app = Flask(__name__)
 mongo_uri = os.getenv('MONGO_URI')
@@ -32,14 +23,13 @@ def convert_fax():
         print(f"Fax not found for serial_number: {serial_number}")  # Log the error if fax is not found
         return jsonify({"error": "Fax not found"}), 404
 
-    image_files = pdf_to_images(pdf_data)
-    if not image_files:
-        return jsonify({"error": "Error converting PDF to images"}), 500
-
-    zip_file_name = 'images.zip'
-    create_zip_file(image_files, zip_file_name)
-
-    return send_file(zip_file_name, mimetype='application/zip', as_attachment=True)
+    # Send the PDF file directly as the response
+    return send_file(
+        BytesIO(pdf_data),  # Convert the PDF data to a BytesIO object
+        mimetype='application/pdf',  # Set the MIME type for PDF
+        as_attachment=True,  # Force download
+        download_name=f'fax_{serial_number}.pdf'  # Name the file based on the serial number
+    )
 
 def fetch_pdf_by_serial_number(serial_number):
     metadata = db['pdf_metadata'].find_one({"serial_number": serial_number})
@@ -48,18 +38,6 @@ def fetch_pdf_by_serial_number(serial_number):
     file_id = metadata['file_id']
     pdf_data = fs.get(file_id).read()
     return pdf_data
-
-def pdf_to_images(pdf_data, output_folder='output_images'):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-    images = convert_from_bytes(pdf_data, 300)
-    image_paths = []
-    for i, image in enumerate(images):
-        image_filename = os.path.join(output_folder, f"page_{i + 1}.png")
-        image.save(image_filename, 'PNG')
-        image_paths.append(image_filename)
-    return image_paths
 
 if __name__ == "__main__":
     app.run(debug=True)
