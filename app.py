@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 mongo_uri = os.getenv('MONGO_URI')
 client = MongoClient(mongo_uri)
-db = client['fax']
+db = client['jaswanth']
 fs = gridfs.GridFS(db)
 
 @app.route('/', methods=['GET'])
