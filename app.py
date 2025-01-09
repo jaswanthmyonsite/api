@@ -15,7 +15,7 @@ fs = gridfs.GridFS(db)
 
 @app.route('/', methods=['GET'])
 def convert_fax():
-    serial_number = int(request.args.get('serial_number', type=int))
+    serial_number = request.args.get('serial_number', type=int)
     if not serial_number:
         return jsonify({"error": "Serial number is required"}), 400
 
@@ -34,7 +34,7 @@ def convert_fax():
     return send_file(image_files[0], mimetype='image/png')
 
 def fetch_pdf_by_serial_number(serial_number):
-    metadata = db['pdf_metadata'].find_one({"serial_number": serial_number})
+    metadata = db['pdf_metadata'].find({"serial_number": serial_number})
     if not metadata:
         return None
     file_id = metadata['file_id']
