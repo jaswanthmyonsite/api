@@ -8,8 +8,8 @@ from io import BytesIO
 import os
 
 app = Flask(__name__)
-
-client = MongoClient('mongodb+srv://jaswanth:10212110@cluster0.gr3uy.mongodb.net/')  # MongoDB Atlas connection
+mongo_uri = os.getenv('MONGO_URI')
+client = MongoClient(mongo_uri)
 db = client['fax']
 fs = gridfs.GridFS(db)
 
