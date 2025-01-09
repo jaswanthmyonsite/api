@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from pymongo import MongoClient
 import gridfs
 import os
+from io import BytesIO 
 
 app = Flask(__name__)
 mongo_uri = os.getenv('MONGO_URI')
